@@ -5,6 +5,7 @@ import {
   JSONSchemaSplitter,
   type SchemaEnforcer,
   SchemaOptionsFactory,
+  SchemaOptionsParser,
   type ValidationParser
 } from 'schema-select'
 import {
@@ -60,5 +61,46 @@ export class ErrorListValidationParser <T> implements ValidationParser<T[]> {
 
   getValid (): T[] {
     return []
+  }
+
+  rateValidity (value: T[]): number {
+    return 1 - value.length
+  }
+}
+
+export class JSONErrorListValidationParser extends ErrorListValidationParser<JsonError> {
+  codePriority: Record<string, number>
+  
+  constructor (
+    codePriority: Record<string, number> = {
+      'type-error': 10
+    }
+  ) {
+    super()
+    this.codePriority = codePriority
+  }
+  
+  rateValidity (value: JsonError[]): number {
+    let totalValidity = 1
+    for (const error of value) {
+      const steps = error.data.pointer.split('/')
+      const depth = Math.max(1, steps.length)
+      const codePriority = this.codePriority[error.code] != null
+        ? Math.max(1, this.codePriority[error.code])
+        : 1
+      totalValidity -= codePriority / depth
+    }
+    return totalValidity
+  }
+}
+
+export class DraftedSchemaOptionsParser extends SchemaOptionsParser<FlagOrObject, JsonError[]> {
+  constructor (
+    draft: Draft
+  ) {
+    super(
+      new DraftedSchemaOptionsFactory(draft),
+      new JSONErrorListValidationParser()
+    )
   }
 }

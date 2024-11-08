@@ -1,6 +1,6 @@
 {
   "name": "json-schema-library-select",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Extends the schema-select library to use json-schema-library",
   "main": "lib/index.js",
   "files": [
@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "json-schema-library": "^10.0.0-rc2",
-    "schema-select": "^1.0.0"
+    "schema-select": "^1.1.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.2",
